@@ -15,7 +15,7 @@ let stateBar_height: CGFloat = 20
 
 
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UIScrollViewDelegate {
 
     
     var showListMaxDt: CGFloat? //最大滑动距离
@@ -60,12 +60,11 @@ class ViewController: UIViewController {
     lazy var showListView: UIView = {
         let listView = UIView(frame: CGRect(x: 0, y: self.view.frame.size.height - 110, width: self.view.frame.size.width, height: self.view.frame.size.height - 116))
         listView.backgroundColor = UIColor.red
-        listView.alpha = 0.8
+        listView.alpha = 1.0
         self.showListMaxDt = listView.frame.origin.y - 116
        
         return listView
     }()
-    
     
     
     //方向图标
@@ -85,14 +84,7 @@ class ViewController: UIViewController {
         return imageview
     }()
     
-    lazy var itemScrollView: UIScrollView = {
-        let scroll = UIScrollView(frame: CGRect(x: 0, y: arrowView.frame.size.height, width: self.showListView.frame.size.width, height: 66))
-        scroll.backgroundColor = UIColor.white
-        scroll.showsVerticalScrollIndicator = true
-        scroll.showsHorizontalScrollIndicator = true
-        scroll.bounces = true
-        return scroll
-    }()
+
    
     //是否展开
     var isShow: Bool = false{
@@ -106,9 +98,45 @@ class ViewController: UIViewController {
         }
     }
     //是否完成缩小动画
-    var narrow: Bool? = nil
+    var narrow: Bool = false
     
-    var itemBtnTitles = ["1","2","3","4","5","6"]
+    var itemBtnTitles : NSMutableArray = ["1","2","3","4","5","6"]
+    
+    
+    lazy var horiScrollView: HorizontalScrollView = {
+        let scroll = HorizontalScrollView(frame: CGRect(x: 0, y: arrowView.frame.size.height, width: self.showListView.frame.size.width, height: 66))
+        scroll.titles = itemBtnTitles
+        
+        return scroll
+    }()
+    
+    lazy var horizontalCollection: UICollectionView = {
+        
+        let height = self.showListView.frame.size.height  - self.arrowView.frame.size.height - self.horiScrollView.frame.size.height
+        let width = self.showListView.frame.size.width
+        let X : CGFloat = 0
+        let Y = self.arrowView.frame.size.height + self.horiScrollView.frame.size.height
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.itemSize = CGSize(width: width, height: height)
+        layout.minimumLineSpacing = 0
+        layout.minimumInteritemSpacing = 0
+        layout.scrollDirection = .horizontal//横向滑动
+        
+        let collection = UICollectionView(frame: CGRect(x: X, y: Y, width: width, height: height), collectionViewLayout: layout)
+        
+        collection.delegate = self
+        collection.dataSource = self
+        collection.showsVerticalScrollIndicator = false
+        collection.showsHorizontalScrollIndicator = false
+        collection.isPagingEnabled = true
+        return collection
+    }()
+    
+    
+    var dataSource: [String] = [String]()
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -117,30 +145,71 @@ class ViewController: UIViewController {
         self.view.addSubview(self.maskview)
         self.view.addSubview(self.showListView)
         self.showListView.addSubview(self.arrowView)
-        self.showListView.addSubview(self.itemScrollView)
+        self.showListView.addSubview(self.horiScrollView)
+        self.showListView.addSubview(self.horizontalCollection)
+    
         
-        let item_Width = UIScreen.main.bounds.size.width / CGFloat(itemBtnTitles.count)
-
-        for i in 0..<itemBtnTitles.count {
+        horiScrollView.btnCallBack = {[weak self] (selected_Index) in
+            self?.horizontalCollection.contentOffset = CGPoint(x: CGFloat(selected_Index) * (self?.horizontalCollection.frame.size.width)!, y: 0)
+            print("选中第 \(selected_Index) 个按钮, CollectionView滚动X = \(String(describing:  self?.horizontalCollection.contentOffset.x))")
             
-            let  btn = UIButton(type: .custom)
-            btn.frame = CGRect(x:  CGFloat(i) * (item_Width + 5) + 5, y: 0, width: item_Width, height: self.itemScrollView.frame.size.height)
-            btn.setTitle(itemBtnTitles[i], for: .normal)
-            btn.setTitleColor(UIColor.black, for: .normal)
-            btn.backgroundColor = UIColor.yellow
-            btn.layer.cornerRadius = 3
-            btn.layer.masksToBounds = true
-            itemScrollView.addSubview(btn)
+            
         }
-        itemScrollView.contentSize = CGSize(width: CGFloat(Int(item_Width) * itemBtnTitles.count + (itemBtnTitles.count + 1) * 5), height: self.itemScrollView.frame.size.height)
-
+        
+        
+        
+//        self.dataSource = [String]()
+        self.horiScrollView.title_NorColor = UIColor.blue
+        self.horiScrollView.title_SelectColor = UIColor.brown
+        
+        horizontalCollection.register(CollectionCell.self, forCellWithReuseIdentifier: collectionCell_Identifier)
+        
         
         
     }
     
-
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+     
+        let offset_Y = scrollView.contentOffset.x/scrollView.frame.size.width
+       
+  
+        //设置按钮的状态和line的位置
+        self.horiScrollView.currentIndex = NSInteger(offset_Y)
+    
+    }
 
 }
+
+
+
+
+// MARK : -- UITableView 代理方式实现
+extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return self.itemBtnTitles.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let  cell = collectionView.dequeueReusableCell(withReuseIdentifier: collectionCell_Identifier, for: indexPath) as! CollectionCell
+//        cell.dataSource = dataSource.add("大小姐刘雯\(indexPath.row)")
+//        cell.data_Source = dataSource.
+        
+        return cell
+        
+    }
+    
+    
+}
+
+
+
+
+
 
 extension ViewController {
     
@@ -275,7 +344,7 @@ extension ViewController {
         if progress > 1 || progress < 0 {
             return
         }
-        if self.narrow! { //是否完成缩小动画
+        if self.narrow { //是否完成缩小动画
             self.showImageView.transform = CGAffineTransform(scaleX: 1, y: 1)
             self.showImageView.frame = CGRect(x: 0, y: navigationBar_Height + stateBar_height, width: self.showImageView.frame.size.width, height: self.showImageView.frame.size.height)
             self.narrow = false
