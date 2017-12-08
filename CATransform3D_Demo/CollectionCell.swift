@@ -13,8 +13,16 @@ let collectionCell_Identifier = "CollectionCell"
 
 class CollectionCell: UICollectionViewCell {
     
-    var data_Source: [String]!
     
+   fileprivate lazy var data_Source: NSMutableArray = {
+       let array = NSMutableArray()
+        return array
+    }()
+    
+    //网络请求标签类型ID(假设为0)
+     var type: NSInteger?
+    //网络请求页码(默认为1)
+    fileprivate var page: NSInteger = 1
     
     lazy var collection: UICollectionView = {
        
@@ -31,17 +39,36 @@ class CollectionCell: UICollectionViewCell {
         collection.dataSource = self
         collection.showsVerticalScrollIndicator = false
         collection.showsHorizontalScrollIndicator = false
+        collection.register(ItemCell.self, forCellWithReuseIdentifier: itemCellIdentifier)
+        contentView.addSubview(collection)
         return collection
     }()
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-//        self.data_Source = [String]()
+    func configureCellData(_ dataSource: NSMutableArray?) {
+        guard let data = dataSource else { return  }
         
-        collection.register(ItemCell.self, forCellWithReuseIdentifier: itemCellIdentifier)
-        contentView.addSubview(collection)
-        print("调用了....")
+        guard self.type != nil else { return }
+        
+        page = 1
+        self.data_Source = data
+        setUpMJRefreshView()
+        self.collection.reloadData()
+
     }
+    
+    
+    fileprivate func setUpMJRefreshView() {
+
+        print("网络请求: self.type = \(String(describing: self.type))")
+    }
+    
+    override init(frame: CGRect) {
+        
+        super.init(frame: frame)
+        
+        
+    }
+    
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -53,19 +80,16 @@ class CollectionCell: UICollectionViewCell {
 extension CollectionCell: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if let data = data_Source {
-            return data.count
-        }
-        return 5
+        return data_Source.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: itemCellIdentifier, for: indexPath) as? ItemCell
         cell?.backgroundColor = UIColor.groupTableViewBackground
-        cell?.imageView.image = UIImage(named: "lw")
-//        cell?.titleLabel.text = "\(data_Source[indexPath.row])"
-        cell?.subTitleLable.text = "维密超模"
+        cell?.imageView.image = UIImage(named: "\(data_Source[indexPath.row])")
+        cell?.titleLabel.text = "\(data_Source[indexPath.row])"
+        cell?.subTitleLable.text = "😍😍😍😍😍😍维密超模"
         return cell!
     }
     

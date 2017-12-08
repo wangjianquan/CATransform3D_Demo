@@ -53,13 +53,15 @@ class ViewController: UIViewController, UIScrollViewDelegate {
         maskview.backgroundColor = UIColor.black
         maskview.isUserInteractionEnabled = true
         maskview.alpha = 0
+        let tap = UITapGestureRecognizer(target: self, action: #selector(showListViewClick(_:)))
+        maskview.addGestureRecognizer(tap)
         return maskview
     }()
     
     //展示的 view
     lazy var showListView: UIView = {
         let listView = UIView(frame: CGRect(x: 0, y: self.view.frame.size.height - 110, width: self.view.frame.size.width, height: self.view.frame.size.height - 116))
-        listView.backgroundColor = UIColor.red
+        listView.backgroundColor = UIColor.black
         listView.alpha = 1.0
         self.showListMaxDt = listView.frame.origin.y - 116
        
@@ -73,7 +75,7 @@ class ViewController: UIViewController, UIScrollViewDelegate {
         imageview.isUserInteractionEnabled = true
         imageview.tag = 101
         imageview.contentMode = .center
-        imageview.image = UIImage(named: "TMWuse_Beacon")
+        imageview.image = UIImage(named: "TMWuse_up")
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(showListViewClick(_:)))
         imageview.addGestureRecognizer(tap)
@@ -91,18 +93,19 @@ class ViewController: UIViewController, UIScrollViewDelegate {
         didSet {
             let imageView = self.showListView.viewWithTag(101) as! UIImageView
             if isShow == true {
-                imageView.image = UIImage(named: "TMWuse_BeaconDonw")
-            }else {
                 imageView.image = UIImage(named: "TMWuse_Beacon")
+            }else {
+                imageView.image = UIImage(named: "TMWuse_up")
             }
         }
     }
-    //是否完成缩小动画
+    
+    //是否完成缩小动画(默认未缩放)
     var narrow: Bool = false
     
-    var itemBtnTitles : NSMutableArray = ["1","2","3","4","5","6"]
+    var itemBtnTitles : NSMutableArray = NSMutableArray(array: ["😆","😍","😊","😎","👏","😙"])
     
-    
+    //滚动标签
     lazy var horiScrollView: HorizontalScrollView = {
         let scroll = HorizontalScrollView(frame: CGRect(x: 0, y: arrowView.frame.size.height, width: self.showListView.frame.size.width, height: 66))
         scroll.titles = itemBtnTitles
@@ -110,6 +113,7 @@ class ViewController: UIViewController, UIScrollViewDelegate {
         return scroll
     }()
     
+    //横向滑动的 UICollectionView
     lazy var horizontalCollection: UICollectionView = {
         
         let height = self.showListView.frame.size.height  - self.arrowView.frame.size.height - self.horiScrollView.frame.size.height
@@ -134,7 +138,7 @@ class ViewController: UIViewController, UIScrollViewDelegate {
     }()
     
     
-    var dataSource: [String] = [String]()
+    lazy var dataSource: NSMutableArray = NSMutableArray(array: ["刘雯_01","刘雯_02","刘雯_03","刘雯_04","刘雯_05"])
     
     
     
@@ -151,17 +155,10 @@ class ViewController: UIViewController, UIScrollViewDelegate {
         
         horiScrollView.btnCallBack = {[weak self] (selected_Index) in
             self?.horizontalCollection.contentOffset = CGPoint(x: CGFloat(selected_Index) * (self?.horizontalCollection.frame.size.width)!, y: 0)
-            print("选中第 \(selected_Index) 个按钮, CollectionView滚动X = \(String(describing:  self?.horizontalCollection.contentOffset.x))")
-            
-            
+           
+            print("选中第 \(selected_Index) 个按钮")
         }
-        
-        
-        
-//        self.dataSource = [String]()
-        self.horiScrollView.title_NorColor = UIColor.blue
-        self.horiScrollView.title_SelectColor = UIColor.brown
-        
+
         horizontalCollection.register(CollectionCell.self, forCellWithReuseIdentifier: collectionCell_Identifier)
         
         
@@ -169,15 +166,15 @@ class ViewController: UIViewController, UIScrollViewDelegate {
     }
     
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-     
-        let offset_Y = scrollView.contentOffset.x/scrollView.frame.size.width
-       
-  
+
+        let offset_Y = scrollView.contentOffset.x/self.horizontalCollection.frame.size.width
         //设置按钮的状态和line的位置
         self.horiScrollView.currentIndex = NSInteger(offset_Y)
-    
+
+        print("停止滚动 currentIndex = \(self.horiScrollView.currentIndex)")
     }
 
+   
 }
 
 
@@ -196,9 +193,8 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let  cell = collectionView.dequeueReusableCell(withReuseIdentifier: collectionCell_Identifier, for: indexPath) as! CollectionCell
-//        cell.dataSource = dataSource.add("大小姐刘雯\(indexPath.row)")
-//        cell.data_Source = dataSource.
-        
+        cell.type = self.horiScrollView.currentIndex
+        cell.configureCellData(dataSource)
         return cell
         
     }
@@ -210,7 +206,7 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
 
 
 
-
+//MARK: -- 动画部分
 extension ViewController {
     
     func tapClickTransform3DAnimationProcess_first() {
