@@ -144,6 +144,7 @@ class ViewController: UIViewController, UIScrollViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.title = "美丽女孩儿"
         self.view.addSubview(self.showImageView)
         self.showImageView.addSubview(self.descLabel)
         self.view.addSubview(self.maskview)
@@ -152,6 +153,8 @@ class ViewController: UIViewController, UIScrollViewDelegate {
         self.showListView.addSubview(self.horiScrollView)
         self.showListView.addSubview(self.horizontalCollection)
     
+        horizontalCollection.register(CollectionCell.self, forCellWithReuseIdentifier: collectionCell_Identifier)
+        
         
         horiScrollView.btnCallBack = {[weak self] (selected_Index) in
             self?.horizontalCollection.contentOffset = CGPoint(x: CGFloat(selected_Index) * (self?.horizontalCollection.frame.size.width)!, y: 0)
@@ -159,7 +162,7 @@ class ViewController: UIViewController, UIScrollViewDelegate {
             print("选中第 \(selected_Index) 个按钮")
         }
 
-        horizontalCollection.register(CollectionCell.self, forCellWithReuseIdentifier: collectionCell_Identifier)
+        
         
         
         
