@@ -20,7 +20,7 @@ class HorizontalScrollView: UIView {
     var btnCallBack: ((_ seleected_Index: NSInteger) -> ())?
     
     var title_NorColor: UIColor = UIColor.black
-    var title_SelectColor: UIColor = UIColor.purple
+    var title_SelectColor: UIColor = UIColor.red
     
     
     

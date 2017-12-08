@@ -102,8 +102,7 @@ class ViewController: UIViewController, UIScrollViewDelegate {
     
     //是否完成缩小动画(默认未缩放)
     var narrow: Bool = false
-    
-    var itemBtnTitles : NSMutableArray = NSMutableArray(array: ["😆","😍","😊","😎","👏","😙"])
+    var itemBtnTitles : NSMutableArray = NSMutableArray(array: ["1😆","2😍","3😊","4😎","5👏","6😙"])
     
     //滚动标签
     lazy var horiScrollView: HorizontalScrollView = {
