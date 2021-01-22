@@ -19,7 +19,7 @@ class ItemCell: UICollectionViewCell {
         let image_Width = self.contentView.frame.size.width
         let image_height = self.contentView.frame.size.height / 3 * 2.3
         let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: image_Width , height: image_height))
-        imageView.contentMode = UIViewContentMode.scaleAspectFill
+        imageView.contentMode = UIView.ContentMode.scaleAspectFill
         imageView.clipsToBounds = true
         return imageView
     }()
@@ -43,18 +43,12 @@ class ItemCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
         setupUI()
-        
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-        
     }
-    
-    
-    
     
 }
 
@@ -65,7 +59,6 @@ extension ItemCell {
         contentView.addSubview(imageView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(subTitleLable)
-        
     }
     
 }
